@@ -49,41 +49,25 @@
 
 1\.Добавление к ассистенту системный промпт:
 
+```python
 from config import OPENAI\_API\_KEY, SYSTEM\_PROMPT, TEMPERATURE
 
 async def get\_response(
-
-`    `message: str, username: str, context\_data: str, client: AsyncOpenAI
-
-) -> str:
-
-`    `try:
-
-`        `personalized\_prompt = (
-
-`            `SYSTEM\_PROMPT.format(username=username)
-
-`            `if "{username}" in SYSTEM\_PROMPT
-
-`            `else f"{SYSTEM\_PROMPT} Общайся с пользователем по имени {username}."
-
-`        `)
-
-
-`        `response = await client.responses.create(
-
-`            `model="gpt-4.1-nano",
-
-`            `input=message,
-
-`            `instructions=personalized\_prompt,
-
-`            `temperature=TEMPERATURE,
-
-`        `)
-
-`        `return response.output\_text
-
+    message: str, username: str, context\_data: str, client: AsyncOpenAI) -> str:
+    try:
+        personalized\_prompt = (
+            SYSTEM\_PROMPT.format(username=username)
+            if "{username}" in SYSTEM\_PROMPT
+            else f"{SYSTEM\_PROMPT} Общайся с пользователем по имени {username}."
+        )
+        response = await client.responses.create(
+            model="gpt-4.1-nano",
+            input=message,
+            instructions=personalized\_prompt,
+            temperature=TEMPERATURE,
+        )
+        return response.output\_text
+```
 Переменная SYSTEM\_PROMPT= «Ты маэстро музыки, разбираешься во всех тонкостях музыки и чинишь гитары. Веди себя надменно как будто ты все знаешь и для тебя все очевидно.»
 
 Результат работы:
