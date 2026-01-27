@@ -4,16 +4,11 @@
 
 
 
-
-
-
 Технологии программирования.
 
 Лабораторная работа №1
 
 Тема: «Знакомство с OpenAI API. Написание простого текстового ассистента»
-
-
 
 
 Работу выполнил:
@@ -24,12 +19,6 @@
 Работу проверил:
 
 Сидельников Максим Эдуардович
-
-
-
-
-
-
 
 
 
@@ -51,31 +40,18 @@
 В коде были реализованы следующие задачи:
 
 1. Использование системного промпта через переменную окружения .env
-
-api\_key = os.getenv("OPENAI\_API\_KEY")
-
-system\_prompt = os.getenv("SYSTEM\_PROMPT")
-
-client = OpenAI(api\_key=api\_key)
-
-def get\_response(text: str, client: OpenAI):
-
-
-
-`    `response = client.responses.create(
-
-`        `model="gpt-4.1-nano",
-
-`        `input=dialog\_history,
-
-`        `instructions=system\_prompt,
-
-`        `temperature=0.8,
-
-`    `)
-
-`    `return response
-
+```
+api_key = os.getenv("OPENAI_API_KEY")
+system_prompt = os.getenv("SYSTEM_PROMPT")
+client = OpenAI(api_key=api_key)
+def get_response(text: str, client: OpenAI):
+    response = client.responses.create(
+        model="gpt-4.1-nano",
+        input=dialog_history,
+        instructions=system_prompt,
+        temperature=0.8,)
+    return response
+```
 Переменная system\_prompt извлекается из файла .env с помощью os.getenv("SYSTEM\_PROMPT").
 
 Системный промпт: \
@@ -89,31 +65,19 @@ def get\_response(text: str, client: OpenAI):
 ![](assets/1.png)
 \
 Работа с параметром temperature:
+```
+api_key = os.getenv("OPENAI_API_KEY")
+system_prompt = os.getenv("SYSTEM_PROMPT")
+client = OpenAI(api_key=api_key)
+def get_response(text: str, client: OpenAI):
 
-api\_key = os.getenv("OPENAI\_API\_KEY")
-
-system\_prompt = os.getenv("SYSTEM\_PROMPT")
-
-client = OpenAI(api\_key=api\_key)
-
-def get\_response(text: str, client: OpenAI):
-
-
-
-`    `response = client.responses.create(
-
-`        `model="gpt-4.1-nano",
-
-`        `input=dialog\_history,
-
-`        `instructions=system\_prompt,
-
-`        `temperature=0.8,
-
-`    `)
-
-`    `return response
-
+    response = client.responses.create(
+        model="gpt-4.1-nano",
+        input=dialog_history,
+        instructions=system_prompt,
+        temperature=0.8,)
+    return response
+```
 В процессе работы с языковой моделью был реализован эксперимент с параметром temperature, который управляет случайностью выводимых ответов.
 
 Я использовал значение температуры 0.1 для получения «Сухих» ответов.
@@ -133,104 +97,60 @@ def get\_response(text: str, client: OpenAI):
 Так же реализована система сохранения истории диалога, для лучшего понимания контекста общения.
 
 История реализована через сохранение в список в рамках одной сессии, и сохранение в JSON для загрузги истории общения при повторном запуске программы.
-
+```
 history.json
 
-def load\_history(max\_messages=6):
+def load_history(max_messages=6):
+    if not os.path.exists(HISTORY_FILE):
+        return []
+    try:
+        with open(HISTORY_FILE, "r", encoding="utf-8") as f:
+            history = json.load(f)
+    except json.JSONDecodeError:
+        return []
+    return history[-max_messages:]
 
-`    `if not os.path.exists(HISTORY\_FILE):
+def save_history(history):
+    with open(HISTORY\_FILE, "w", encoding="utf-8") as f:
+        json.dump(history, f, ensure_ascii=False, indent=2)
 
-`        `return []
-
-`    `try:
-
-`        `with open(HISTORY\_FILE, "r", encoding="utf-8") as f:
-
-`            `history = json.load(f)
-
-`    `except json.JSONDecodeError:
-
-`        `return []
-
-`    `return history[-max\_messages:]
-
-
-def save\_history(history):
-
-`    `with open(HISTORY\_FILE, "w", encoding="utf-8") as f:
-
-`        `json.dump(history, f, ensure\_ascii=False, indent=2)
-
-
-def clear\_history():
-
-`    `with open(HISTORY\_FILE, "w", encoding="utf-8") as f:
-
-`        `json.dump([], f, ensure\_ascii=False, indent=2)
-
+def clear_history():
+    with open(HISTORY_FILE, "w", encoding="utf-8") as f:
+        json.dump([], f, ensure_ascii=False, indent=2)
+```
+```
 main.py
+dialog_history = []
+MAX_HISTORY = 6
+dialog_history = load_history(MAX_HISTORY)
+def get_response(text: str, client: OpenAI):
+    global dialog_history
+    dialog_history.append({"role": "user", "content": text})
+    response = client.responses.create(
+        model="gpt-4.1-nano",
+        input=dialog_history,
+        instructions=system_prompt,
+        temperature=0.8,)
+    dialog_history.append({"role": "assistant", "content": response.output_text})
+    dialog_history[:] = dialog_history[-MAX_HISTORY:]
+    save_history(dialog_history)
+    return response
 
-dialog\_history = []
-
-MAX\_HISTORY = 6
-
-dialog\_history = load\_history(MAX\_HISTORY)
-
-def get\_response(text: str, client: OpenAI):
-
-`    `global dialog\_history
-
-`    `dialog\_history.append({"role": "user", "content": text})
-
-`    `response = client.responses.create(
-
-`        `model="gpt-4.1-nano",
-
-`        `input=dialog\_history,
-
-`        `instructions=system\_prompt,
-
-`        `temperature=0.8,
-
-`    `)
-
-`    `dialog\_history.append({"role": "assistant", "content": response.output\_text})
-
-`    `dialog\_history[:] = dialog\_history[-MAX\_HISTORY:]
-
-`    `save\_history(dialog\_history)
-
-`    `return response
-
-
-if \_\_name\_\_ == "\_\_main\_\_":
-
-`    `print("Введите ваш вопрос (или 'exit' для выхода):")
-
-`    `while True:
-
-`        `question = input("Вы: ")
-
-`        `if question.lower() == "exit":
-
-`            `print("Завершение программы.")
-
-`            `break
-
-`        `if question.lower() == "clear":
-
-`            `dialog\_history = []
-
-`            `clear\_history()
-
-`            `print("История диалога очищена.")
-
-`            `continue
-
-`        `answer = get\_response(question, client)
-
-`        `print("AI:", answer.output\_text)
-
+if __name__ == "__main__":
+    print("Введите ваш вопрос (или 'exit' для выхода):")
+    while True:
+        question = input("Вы: ")
+        if question.lower() == "exit":
+            print("Завершение программы.")
+            break
+        if question.lower() == "clear":
+            dialog_history = []
+            clear_history()
+            print("История диалога очищена.")
+            continue
+        answer = get_response(question, client)
+        print("AI:", answer.output_text)
+```
 Контекст переписки ограничивался 6 последними сообщениями (3 от пользователя и 3 от ИИ). Это позволяло модели помнить предыдущие вопросы и ответы, улучшая качество взаимодействия и позволяя более точно реагировать на новые запросы пользователя
 
 ![](assets/5.png)
