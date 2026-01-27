@@ -6,7 +6,9 @@
 
 Работа началась с настройки среды: в проект внесли файл requirements.txt и конфигурацию для devcontainer (папка .devcontainer с файлами Dockerfile, devcontainer.json, docker-compose.yml). Это позволило запустить изолированную среду с необходимыми сервисами. Сборка была выполнена командой Dev Containers: Rebuild and Reopen in Container и прошла без ошибок
 
-![](assets\Aspose.Words.d4457806-770e-4b45-8398-f971b12b787a.001.png)![](assets\Aspose.Words.d4457806-770e-4b45-8398-f971b12b787a.002.png)**
+
+![](assets\Aspose.Words.d4457806-770e-4b45-8398-f971b12b787a.001.png)
+![](assets\Aspose.Words.d4457806-770e-4b45-8398-f971b12b787a.002.png)
 
 **2. Создание векторной базы данных**
 
@@ -68,7 +70,7 @@ services:
     volumes:
       - ..:workspaces
     command: sleep infinity
-    gpus: all        # чтобы эмбеддер видел видеокарту
+    gpus: all       
     depends_on:
       - standalone
     networks:
